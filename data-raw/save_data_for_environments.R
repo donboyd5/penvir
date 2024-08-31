@@ -8,7 +8,7 @@ saveRDS(mtcars |>
 # trs data ----------------------------------------------------------------
 
 tdir <- fs::path("inst", "extdata", "trs")
-saveRDS(mtcars |>
-          rename(benefits=mpg), fs::path(fdir, "beneficiaries.rds"))
+saveRDS(iris |>
+          rename(benefits=Sepal.Length), fs::path(tdir, "beneficiaries.rds"))
 
 

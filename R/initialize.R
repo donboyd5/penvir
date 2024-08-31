@@ -31,3 +31,29 @@ initialize_frs <- function() {
     }
   }
 }
+
+
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+populate <- function() {
+  print("populating frs")
+  if (length(ls(envir = frs)) == 0) {
+    # Example data
+
+    fpath <- system.file("extdata", "frs", "beneficiaries.rds", package = "penvir")
+
+    frs$beneficiaries <- readRDS(fpath)
+
+    # Example functions
+    frs$calculate_benefits <- function() {
+      sum(frs$beneficiaries$benefits)
+    }
+
+  }
+}
+
+

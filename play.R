@@ -30,10 +30,19 @@ frs$beneficiaries
 usethis::use_directory("inst/extdata") # create the inst/extdata directory
 
 # create path to data if it exists (needs penvir installed)
-fpath <- system.file("extdata", "my_data.csv", package = "penvir")
+# fpath <- system.file("extdata", "my_data.csv", package = "penvir")
+fpath <- system.file("extdata", "frs", "beneficiaries.rds", package = "penvir")
+readRDS(fpath)
+
+tpath <- system.file("extdata", "trs", "beneficiaries.rds", package = "penvir")
+readRDS(tpath)
+
 
 # it's ok to create subfolders
 system.file("extdata", "subfolder", "datafile.rds", package = "yourpackage")
+
+fpath <- system.file("extdata", "frs", "beneficiaries", package = "penvir")
+readRDS(fpath)
 
 
 
