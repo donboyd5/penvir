@@ -111,7 +111,7 @@ deep_copy_env <- function(env_name) {
 #' initialize_environments()
 #'
 #' # Retrieve and expose the 'frs' environment
-#' frs_env <- expose_environment("frs")
+#' frs_env <- get_env("frs")
 #'
 #' # Optionally assign it to the global environment
 #' frs <- frs_env
@@ -120,7 +120,7 @@ deep_copy_env <- function(env_name) {
 #' print(ls(envir = frs))
 #'
 #' @export
-expose_environment <- function(env_name) {
+get_env <- function(env_name) {
   check_environment_exists(env_name)
 }
 
@@ -145,7 +145,7 @@ expose_environment <- function(env_name) {
 #' @examples
 #' initialize_environments()
 #' frs <- get_data("frs")
-#' expose_environment("frs") # If needed
+#' get_env("frs") # If needed
 #'
 #' @export
 get_data <- function(env_name, expose = FALSE) {

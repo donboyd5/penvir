@@ -2,11 +2,11 @@
 
 export(check_env_status)
 export(deep_copy_env)
-export(expose_environment)
 export(get_data)
 export(get_env)
 export(get_environments)
 export(initialize_environments)
 export(pension_model)
 export(reset_env)
+export(retrieve_env)
 importFrom(tibble,tibble)
