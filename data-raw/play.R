@@ -51,3 +51,15 @@ readRDS(fpath)
 # useful usethis functions
 use_data() # save data to data/
 usethis::use_directory("inst/extdata") # create a special folder for the pension data
+
+usethis::use_package("tibble")
+usethis::use_import_from("tibble", "tibble")
+
+
+
+frs_copy <- frs
+names(frs_copy)
+frs_copy$beneficiaries
+
+library(penvir)
+
