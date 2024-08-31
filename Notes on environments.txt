@@ -1,0 +1,14 @@
+
+Goal:
+- Have multiple environments each can be populated with data and functions e.g., frs, trs, ...
+- Empty at package start
+- Can be seem with data(package="penvir")
+- Populated with data and functions with penvir::frs::populate() or penvir::trs::populate()
+- Can be reset with penvir::frs::reset() or penvir::trs::reset()
+- Can be tested
+
+
+Steps
+- Create empty environments and store in /data: create_empty_environments.R
+- Populate an environment on first use
+
