@@ -41,20 +41,46 @@ initialize_frs <- function() {
 #' @examples
 populate <- function(env) {
   env_name <- deparse(substitute(env))
-  print(paste0("populating ", env_name))
+  print(paste0("possibly will populate ", env_name))
   if (length(ls(envir = env)) == 0) {
+
+    print(paste0("env empty so now trying to populate ", env_name))
+
     # Example data
 
-    fpath <- system.file("extdata", "frs", "beneficiaries.rds", package = "penvir")
+    fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
 
-    frs$beneficiaries <- readRDS(fpath)
+    env$beneficiaries <- readRDS(fpath)
 
     # Example functions
-    frs$calculate_benefits <- function() {
-      sum(frs$beneficiaries$benefits)
+    env$calculate_benefits <- function() {
+      sum(env$beneficiaries$benefits)
     }
 
   }
 }
+
+
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+reset <- function(env) {
+  if (!is.environment(env)) {
+    stop("Argument must be an environment")
+  }
+
+  # Get all object names in the environment
+  obj_names <- ls(envir = env, all.names = TRUE)
+
+  # Remove all objects
+  rm(list = obj_names, envir = env)
+
+  # Return the now-empty environment (invisible)
+  invisible(env)
+}
+
 
 
