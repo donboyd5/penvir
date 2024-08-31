@@ -117,4 +117,41 @@ reset <- function(env) {
 }
 
 
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_data <- function(env_name) {
+  # Check if the environment exists
+  if (!exists(env_name, envir = .GlobalEnv)) {
+    stop(paste0("Environment ", env_name, " does not exist"))
+  }
+
+  env <- get(env_name, envir = .GlobalEnv)
+
+  if (length(ls(envir = env)) == 0) {
+    print(paste0("Environment ", env_name, " is empty. Populating now..."))
+
+    # Example data file path
+    fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
+
+    if (file.exists(fpath)) {
+      env$beneficiaries <- readRDS(fpath)
+    } else {
+      stop(paste0("File not found: ", fpath))
+    }
+
+    # Example functions
+    env$calculate_benefits <- function() {
+      sum(env$beneficiaries$benefits)
+    }
+  }
+
+  return(env)
+}
+
+
+
 
