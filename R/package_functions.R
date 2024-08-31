@@ -140,7 +140,9 @@ get_data <- function(env_name, expose = FALSE) {
   environments <- get_environments()
 
   if (!env_name %in% names(environments)) {
-    stop(paste0("Environment ", env_name, " does not exist"))
+    stop(paste0("Environment '", env_name, "' does not exist. ",
+                "Please choose from the following valid environments: ",
+                paste(names(environments), collapse = ", "), "."))
   }
 
   env <- environments[[env_name]]
@@ -174,8 +176,6 @@ get_data <- function(env_name, expose = FALSE) {
 }
 
 
-
-
 #' Get a Specific Environment by Name
 #'
 #' Retrieves a specific environment from the list of environments.
@@ -185,8 +185,15 @@ get_data <- function(env_name, expose = FALSE) {
 #' @export
 get_env <- function(env_name) {
   environments <- get_environments()
+
+  if (!env_name %in% names(environments)) {
+    stop(paste0("Environment '", env_name, "' does not exist. ",
+                "Available environments are: ", paste(names(environments), collapse = ", "), "."))
+  }
+
   environments[[env_name]]
 }
+
 
 
 #' Get the List of Environments
@@ -312,7 +319,9 @@ reset_env <- function(env_name) {
   environments <- get_environments()
 
   if (!env_name %in% names(environments)) {
-    stop(paste0("Environment ", env_name, " does not exist"))
+    stop(paste0("Environment '", env_name, "' does not exist. ",
+                "Please reset one of the following valid environments: ",
+                paste(names(environments), collapse = ", "), "."))
   }
 
   env <- environments[[env_name]]
