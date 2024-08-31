@@ -48,7 +48,8 @@ populate <- function(env) {
 
     # Example data
 
-    fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
+    # fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
+    fpath <- fs::path_package("extdata", env_name, "beneficiaries.rds", package = "penvir")
 
     env$beneficiaries <- readRDS(fpath)
 
