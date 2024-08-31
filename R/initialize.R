@@ -39,27 +39,60 @@ initialize_frs <- function() {
 #' @export
 #'
 #' @examples
-populate <- function(env) {
-  env_name <- deparse(substitute(env))
-  print(paste0("possibly will populate ", env_name))
+# populate <- function(env) {
+#   env_name <- deparse(substitute(env))
+#   print(paste0("possibly will populate ", env_name))
+#   if (length(ls(envir = env)) == 0) {
+#
+#     print(paste0("env empty so now trying to populate ", env_name))
+#
+#     # Example data
+#
+#     # fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
+#     fpath <- fs::path_package("extdata", env_name, "beneficiaries.rds", package = "penvir")
+#
+#     env$beneficiaries <- readRDS(fpath)
+#
+#     # Example functions
+#     env$calculate_benefits <- function() {
+#       sum(env$beneficiaries$benefits)
+#     }
+#
+#   }
+# }
+#
+#
+#
+populate <- function(env_name) {
+  # Check if the environment exists in package_envs
+  if (!env_name %in% names(package_envs)) {
+    stop(paste0("Environment ", env_name, " does not exist in package_envs"))
+  }
+
+  env <- package_envs[[env_name]]
+
+  print(paste0("Possibly will populate ", env_name))
   if (length(ls(envir = env)) == 0) {
 
-    print(paste0("env empty so now trying to populate ", env_name))
+    print(paste0("Environment empty, so now trying to populate ", env_name))
 
-    # Example data
-
-    # fpath <- system.file("extdata", env_name, "beneficiaries.rds", package = "penvir")
+    # Example data file path
     fpath <- fs::path_package("extdata", env_name, "beneficiaries.rds", package = "penvir")
 
-    env$beneficiaries <- readRDS(fpath)
+    if (file.exists(fpath)) {
+      env$beneficiaries <- readRDS(fpath)
+    } else {
+      stop(paste0("File not found: ", fpath))
+    }
 
     # Example functions
     env$calculate_benefits <- function() {
       sum(env$beneficiaries$benefits)
     }
-
   }
 }
+
+
 
 
 #' Title
