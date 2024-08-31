@@ -3,6 +3,23 @@
   initialize_environments()
 }
 
+#' Check if Environment Exists
+#'
+#' Checks if an environment exists in the list of environments and provides a helpful error message if it does not.
+#'
+#' @param env_name The name of the environment to check.
+#' @return The environment if it exists; otherwise, an error is thrown.
+check_environment_exists <- function(env_name) {
+  environments <- get_environments()
+
+  if (!env_name %in% names(environments)) {
+    stop(paste0("Environment '", env_name, "' does not exist. ",
+                "Please choose from the following valid environments: ",
+                paste(names(environments), collapse = ", "), "."))
+  }
+
+  return(environments[[env_name]])
+}
 
 #' Check the Status of All Environments
 #'
@@ -44,8 +61,6 @@ check_env_status <- function() {
   return(env_status)
 }
 
-
-
 #' Create a Deep Copy of an Environment
 #'
 #' Creates a deep copy of the specified environment, including all objects within it.
@@ -74,12 +89,11 @@ check_env_status <- function() {
 #'
 #' @export
 deep_copy_env <- function(env_name) {
-  env <- get_env(env_name)
+  env <- check_environment_exists(env_name)
   env_list <- as.list(env, all.names = TRUE)
   new_env <- list2env(env_list, parent = emptyenv())
   return(new_env)
 }
-
 
 #' Expose an Environment
 #'
@@ -107,10 +121,8 @@ deep_copy_env <- function(env_name) {
 #'
 #' @export
 expose_environment <- function(env_name) {
-  get_env(env_name)
+  check_environment_exists(env_name)
 }
-
-
 
 #' Get and Populate a Named Environment
 #'
@@ -137,15 +149,7 @@ expose_environment <- function(env_name) {
 #'
 #' @export
 get_data <- function(env_name, expose = FALSE) {
-  environments <- get_environments()
-
-  if (!env_name %in% names(environments)) {
-    stop(paste0("Environment '", env_name, "' does not exist. ",
-                "Please choose from the following valid environments: ",
-                paste(names(environments), collapse = ", "), "."))
-  }
-
-  env <- environments[[env_name]]
+  env <- check_environment_exists(env_name)
 
   if (length(ls(envir = env)) == 0) {
     print(paste0("Environment ", env_name, " is empty. Populating now..."))
@@ -175,7 +179,6 @@ get_data <- function(env_name, expose = FALSE) {
   return(env)
 }
 
-
 #' Get a Specific Environment by Name
 #'
 #' Retrieves a specific environment from the list of environments.
@@ -184,17 +187,8 @@ get_data <- function(env_name, expose = FALSE) {
 #' @return The specified environment.
 #' @export
 get_env <- function(env_name) {
-  environments <- get_environments()
-
-  if (!env_name %in% names(environments)) {
-    stop(paste0("Environment '", env_name, "' does not exist. ",
-                "Available environments are: ", paste(names(environments), collapse = ", "), "."))
-  }
-
-  environments[[env_name]]
+  check_environment_exists(env_name)
 }
-
-
 
 #' Get the List of Environments
 #'
@@ -205,9 +199,6 @@ get_env <- function(env_name) {
 get_environments <- function() {
   get("environments", envir = .penvir_env)
 }
-
-
-
 
 #' Initialize Environments for the Pension Package
 #'
@@ -243,8 +234,6 @@ initialize_environments <- function() {
   # Store the environments list in the package environment
   assign("environments", environments, envir = .penvir_env)
 }
-
-
 
 #' Run a Pension Model on a Specified Environment
 #'
@@ -286,9 +275,6 @@ pension_model <- function(fund_env) {
   )
 }
 
-
-
-
 #' Reset a Named Environment to Its Empty State
 #'
 #' Resets a specified environment by removing all objects within it, effectively returning
@@ -316,17 +302,8 @@ pension_model <- function(fund_env) {
 #'
 #' @export
 reset_env <- function(env_name) {
-  environments <- get_environments()
+  env <- check_environment_exists(env_name)
 
-  if (!env_name %in% names(environments)) {
-    stop(paste0("Environment '", env_name, "' does not exist. ",
-                "Please reset one of the following valid environments: ",
-                paste(names(environments), collapse = ", "), "."))
-  }
-
-  env <- environments[[env_name]]
-
-  # Clear all objects from the environment
   rm(list = ls(envir = env), envir = env)
 
   message(paste0("Environment '", env_name, "' has been reset to empty."))
