@@ -207,29 +207,30 @@ get_environments <- function() {
 #' loading to ensure that the necessary environments are available. It can also be called
 #' manually if needed to reinitialize the environments.
 #'
+#' @param default_envs A named list of environments to initialize by default.
+#'   This allows the user to specify custom default environments. If not provided,
+#'   a standard set of environments will be initialized.
+#'
 #' @details
 #' The `initialize_environments` function creates a list of environments that are used throughout
 #' the pension package. Each environment is initialized as an empty environment with no parent,
 #' ensuring isolation. The list of environments is stored in a package-specific environment,
 #' making it accessible throughout the package but not cluttering the global environment.
 #'
-#' This function is called automatically during the package's `.onLoad()` process, but can be
-#' manually invoked if reinitialization of the environments is required.
-#'
 #' @examples
-#' # Manually initialize environments (typically not needed)
+#' # Manually initialize environments with defaults (typically not needed)
 #' initialize_environments()
 #'
+#' # Initialize with custom environments
+#' initialize_environments(default_envs = list(my_env = new.env()))
+#'
 #' @export
-initialize_environments <- function() {
+initialize_environments <- function(default_envs = list(frs = new.env(), trs = new.env())) {
   # Create a package-specific environment to hold all environments
   .penvir_env <<- new.env(parent = emptyenv())
 
-  environments <- list(
-    frs = new.env(parent = emptyenv()),
-    trs = new.env(parent = emptyenv())
-    # Add more environments as needed
-  )
+  # Use default environments if provided, otherwise use the standard set
+  environments <- default_envs
 
   # Store the environments list in the package environment
   assign("environments", environments, envir = .penvir_env)
