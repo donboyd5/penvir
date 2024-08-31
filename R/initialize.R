@@ -39,9 +39,10 @@ initialize_frs <- function() {
 #' @export
 #'
 #' @examples
-populate <- function() {
-  print("populating frs")
-  if (length(ls(envir = frs)) == 0) {
+populate <- function(env) {
+  env_name <- deparse(substitute(env))
+  print(paste0("populating ", env_name))
+  if (length(ls(envir = env)) == 0) {
     # Example data
 
     fpath <- system.file("extdata", "frs", "beneficiaries.rds", package = "penvir")
