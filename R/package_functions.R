@@ -13,9 +13,11 @@ check_environment_exists <- function(env_name) {
   environments <- get_environments()
 
   if (!env_name %in% names(environments)) {
-    stop(paste0("Environment '", env_name, "' does not exist. ",
-                "Please choose from the following valid environments: ",
-                paste(names(environments), collapse = ", "), "."))
+    stop(paste0(
+      "Environment '", env_name, "' does not exist. ",
+      "Please choose from the following valid environments: ",
+      paste(names(environments), collapse = ", "), "."
+    ))
   }
 
   return(environments[[env_name]])
@@ -144,8 +146,15 @@ get_env <- function(env_name) {
 #'
 #' @examples
 #' initialize_environments()
+#'
+#' # Populate and retrieve the 'frs' environment
 #' frs <- get_data("frs")
-#' get_env("frs") # If needed
+#'
+#' # Attempt to populate an already populated environment
+#' frs <- get_data("frs") # This should indicate that 'frs' is already populated
+#'
+#' # Expose the populated environment to the global environment
+#' get_data("frs", expose = TRUE)
 #'
 #' @export
 get_data <- function(env_name, expose = FALSE) {
@@ -178,6 +187,7 @@ get_data <- function(env_name, expose = FALSE) {
 
   return(env)
 }
+
 
 #' Get a Specific Environment by Name
 #'
@@ -224,6 +234,9 @@ get_environments <- function() {
 #' # Initialize with custom environments
 #' initialize_environments(default_envs = list(my_env = new.env()))
 #'
+#' # Reinitialize environments while resetting existing ones
+#' initialize_environments(default_envs = list(frs = new.env(), trs = new.env()))
+#'
 #' @export
 initialize_environments <- function(default_envs = list(frs = new.env(), trs = new.env())) {
   # Create a package-specific environment to hold all environments
@@ -235,6 +248,7 @@ initialize_environments <- function(default_envs = list(frs = new.env(), trs = n
   # Store the environments list in the package environment
   assign("environments", environments, envir = .penvir_env)
 }
+
 
 #' Run a Pension Model on a Specified Environment
 #'
@@ -298,8 +312,10 @@ pension_model <- function(fund_env) {
 #'
 #' @examples
 #' initialize_environments()
-#' get_data("frs")
+#'
+#' # Reset and repopulate the 'frs' environment
 #' reset_env("frs")
+#' get_data("frs")
 #'
 #' @export
 reset_env <- function(env_name) {
