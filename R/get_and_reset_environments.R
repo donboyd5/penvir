@@ -92,6 +92,11 @@ get_data <- function(env_name) {
     env$calculate_benefits <- function() {
       sum(env$beneficiaries$benefits)
     }
+  } else {
+    print(paste0("NO. Environment ", env_name, " is already populated."))
+    # print(paste0('Use reset_env(\"', env_name, '\") to clear the environment before populating.'))
+    cat(paste0('Use reset_env("', env_name, '") to clear the environment before populating.\n'))
+    return(invisible(NULL))
   }
 
   # Assign the populated environment back to the global environment
