@@ -1,12 +1,7 @@
-
-
-
-
 .onLoad <- function(libname, pkgname) {
+  # put this into zzz.R when package is further along
   initialize_environments()
 }
-
-
 
 
 #' Check the Status of All Environments
@@ -86,19 +81,34 @@ deep_copy_env <- function(env_name) {
 }
 
 
-#' Expose an Environment to the Global Environment
+#' Expose an Environment
 #'
-#' Exposes a specified environment to the global environment, making it accessible
-#' and modifiable by the user. This function should be used with caution, as it modifies
-#' the global environment.
+#' Returns a specified environment, allowing the user to access and modify it.
+#' This function does not modify the global environment. Users can choose to
+#' assign the returned environment to the global environment if needed.
 #'
-#' @param env_name The name of the environment to expose.
+#' @param env_name The name of the environment to return. The environment must
+#'   exist in the list of environments initialized by the package.
+#'
+#' @return The specified environment. The environment is not assigned to the global
+#'   environment automatically; it is returned and can be assigned by the user if desired.
+#'
+#' @examples
+#' initialize_environments()
+#'
+#' # Retrieve and expose the 'frs' environment
+#' frs_env <- expose_environment("frs")
+#'
+#' # Optionally assign it to the global environment
+#' frs <- frs_env
+#'
+#' # Access and modify the environment
+#' print(ls(envir = frs))
+#'
 #' @export
 expose_environment <- function(env_name) {
-  assign(env_name, get_env(env_name), envir = .GlobalEnv)
+  get_env(env_name)
 }
-
-
 
 
 
@@ -312,4 +322,3 @@ reset_env <- function(env_name) {
 
   message(paste0("Environment '", env_name, "' has been reset to empty."))
 }
-
