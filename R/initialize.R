@@ -7,6 +7,7 @@
 #'
 #' @examples
 initialize_frs <- function() {
+  print("populating frs")
   if (length(ls(envir = frs)) == 0) {
     # Example data
     frs$beneficiaries <- data.frame(

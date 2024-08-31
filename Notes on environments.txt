@@ -10,5 +10,5 @@ Goal:
 
 Steps
 - Create empty environments and store in /data: create_empty_environments.R
-- Populate an environment on first use
+- Populate an environment initialize_frs() after which it is visible with data()
 
