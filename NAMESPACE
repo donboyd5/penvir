@@ -3,3 +3,4 @@
 export(initialize_frs)
 export(pension_model)
 export(populate)
+export(reset)
