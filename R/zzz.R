@@ -20,6 +20,7 @@
 #' @examples
 #' # Manually initialize environments with defaults (typically not needed)
 #' initialize_environments()
+#' @noRd
 initialize_environments <- function() {
   # Create a package-specific environment to hold all environments
   assign(".penvir_env", new.env(parent = emptyenv()), envir = parent.env(environment()))

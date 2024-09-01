@@ -41,7 +41,7 @@ environment_exists <- function(env_name, verbose = FALSE) {
 #' easier to manage and track them.
 #'
 #' @examples
-#' initialize_environments()
+#' # initialize_environments()
 #' # library("penvir")
 #' check_environment_status()
 #'
@@ -112,13 +112,12 @@ deep_copy_env <- function(env) {
 #' The function first checks if the specified environment exists in the
 #' `environments` list. If it does not exist, an error is thrown. If the
 #' environment is empty, the function attempts to populate it using data from
-#' the package's `extdata` directory. If `expose = TRUE`, the environment will
-#' be returned but not assigned to the global environment.
+#' the package's `extdata` directory.
 #'
 #' @return Invisibly returns the environment after populating it.
 #'
 #' @examples
-#' initialize_environments()
+#' # initialize_environments()
 #'
 #' # Populate and retrieve the 'frs' environment
 #' frs <- get_data("frs")
@@ -126,41 +125,18 @@ deep_copy_env <- function(env) {
 #' # Attempt to populate an already populated environment
 #' frs <- get_data("frs") # This should indicate that 'frs' is already populated
 #'
-#' # Expose the populated environment to the global environment
-#' get_data("frs", expose = TRUE)
-#'
 #' @export
 get_data <- function(env_name) {
+  .penvir_env <- get(".penvir_env", envir = parent.env(environment()))  # Access .penvir_env
+
   stopifnot(environment_exists(env_name))
 
-  populate("env_name")
-
+  populate(env_name)
   env <- get_env(env_name)
-
-  if (length(ls(envir = env)) == 0) {
-    message(paste0("Environment ", env_name, " is empty. Populating now..."))
-
-    # Path to folder for data files associated with env_name
-    folder_path <- fs::path_package("extdata", env_name, package = "penvir")
-
-    fpath <- fs::path(folder_path, "beneficiaries.rds")
-
-    if (file.exists(fpath)) {
-      env$beneficiaries <- readRDS(fpath)
-    } else {
-      stop(paste0("File not found: ", fpath))
-    }
-
-    env$calculate_benefits <- function() {
-      sum(env$beneficiaries$benefits)
-    }
-  } else {
-    message(paste0("Environment ", env_name, " is already populated."))
-    message(paste0('Use reset_env("', env_name, '") to clear the environment before populating.\n'))
-  }
 
   return(deep_copy_env(env))
 }
+
 
 
 #' Get a Specific Pension Fund Environment by Name
@@ -216,7 +192,7 @@ get_environments <- function() {
 #' users to input different environments representing various pension funds.
 #'
 #' @examples
-#' initialize_environments()
+#' # initialize_environments()
 #' frs <- get_data("frs")
 #' results <- pension_model(frs)
 #' print(results$benefits)
@@ -249,13 +225,12 @@ is_populated <- function(env) {
 #' The function first checks if the specified environment exists in the
 #' `environments` list. If it does not exist, an error is thrown. If the
 #' environment is empty, the function attempts to populate it using data from
-#' the package's `extdata` directory. If `expose = TRUE`, the environment will
-#' be returned but not assigned to the global environment.
+#' the package's `extdata` directory.
 #'
 #' @return Nothing.
 #'
 #' @examples
-#' initialize_environments()
+#' # initialize_environments()
 #'
 #' # Populate the 'frs' environment
 #' frs <- populate("frs")
@@ -263,25 +238,20 @@ is_populated <- function(env) {
 #' # Attempt to populate an already populated environment
 #' frs <- get_data("frs") # This should indicate that 'frs' is already populated
 #'
-#' # Expose the populated environment to the global environment
-#' get_data("frs", expose = TRUE)
-#'
 #' @export
 populate <- function(env_name) {
-  # stopifnot(environment_exists(env_name))
-  if (!environment_exists(env_name)) {
+  if (!environment_exists(env_name, verbose=TRUE)) {
     return(invisible(NULL))
   }
 
   env <- get_env(env_name)
 
   if (is_populated(env)) {
-    message(paste0("Environment ", env_name, " is already populated."))
+    # message(paste0("Environment ", env_name, " is already populated."))
     return(invisible(NULL))
   }
 
-  message(paste0("Environment ", env_name, " is empty. Populating now..."))
-
+  message(paste0("Populating empty environment ", env_name, "..."))
 
   # Path to folder for data files associated with env_name
   folder_path <- fs::path_package("extdata", env_name, package = "penvir")
@@ -324,7 +294,7 @@ populate <- function(env_name) {
 #'   the environment.
 #'
 #' @examples
-#' initialize_environments()
+#' # initialize_environments()
 #'
 #' # Reset and repopulate the 'frs' environment
 #' reset_env("frs")
