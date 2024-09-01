@@ -1,4 +1,3 @@
-
 source("data-raw/pkgtools.R")
 
 library(penvir)
@@ -13,7 +12,7 @@ devtools::install()
 devtools::check()
 
 
-data(package="penvir")
+data(package = "penvir")
 
 names(frs)
 names(trs)
@@ -62,4 +61,3 @@ names(frs_copy)
 frs_copy$beneficiaries
 
 library(penvir)
-

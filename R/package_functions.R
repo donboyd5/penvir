@@ -5,17 +5,15 @@
 
 #' Check if Environment Exists
 #'
-#' Checks if an environment exists in the list of environments and provides a
-#' helpful error message if it does not.
+#' Checks if an environment exists in the list of environments.
 #'
 #' @param env_name The name of the environment to check.
 #' @return TRUE or FALSE.
-environment_exists <- function(env_name) {
+environment_exists <- function(env_name, verbose = FALSE) {
   environments <- get_environments()
-
   environment_exists <- env_name %in% names(environments)
 
-  if (!environment_exists) {
+  if (!environment_exists & verbose) {
     message(paste0(
       "Environment '", env_name, "' does not exist. ",
       "Valid environments are: \n  ",
@@ -53,6 +51,7 @@ environment_exists <- function(env_name) {
 check_environment_status <- function() {
   environments <- get_environments()
   sorted_names <- names(environments) |> sort()
+
   environment_status <- tibble::tibble(
     env_name = sorted_names,
     status = sapply(sorted_names, function(env_name) {
@@ -140,6 +139,15 @@ deep_copy_env <- function(env) {
 get_data <- function(env_name) {
   stopifnot(environment_exists(env_name))
 
+  if (!environment_exists) {
+    message(paste0(
+      "Environment '", env_name, "' does not exist. ",
+      "Valid environments are: \n  ",
+      paste(names(environments), collapse = ", "), "."
+    ))
+    return(invisible(NULL))
+  }
+
   populate("env_name")
 
   env <- get_env(env_name)
@@ -178,8 +186,9 @@ get_data <- function(env_name) {
 #' @return The specified environment.
 #' @noRd
 get_env <- function(env_name) {
-  if(environment_exists(env_name))
+  if (environment_exists(env_name)) {
     return(.penvir_env$environments[[env_name]])
+  }
 }
 
 #' Get the List of Environments
@@ -221,7 +230,7 @@ initialize_environments <- function() {
   env_list <- list(
     frs = new.env(),
     trs = new.env()
-    )
+  )
 
   # Store the environments list in the package environment
   assign("environments", env_list, envir = .penvir_env)
@@ -308,13 +317,14 @@ is_populated <- function(env) {
 #'
 #' @export
 populate <- function(env_name) {
-
   # stopifnot(environment_exists(env_name))
-  if(!environment_exists(env_name)) return(invisible(NULL))
+  if (!environment_exists(env_name)) {
+    return(invisible(NULL))
+  }
 
   env <- get_env(env_name)
 
-  if(is_populated(env)) {
+  if (is_populated(env)) {
     message(paste0("Environment ", env_name, " is already populated."))
     return(invisible(NULL))
   }
