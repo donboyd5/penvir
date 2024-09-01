@@ -3,7 +3,6 @@
 export(check_environment_status)
 export(deep_copy_env)
 export(get_data)
-export(get_environments)
 export(initialize_environments)
 export(pension_model)
 export(populate)

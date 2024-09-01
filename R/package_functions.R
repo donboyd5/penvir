@@ -1,13 +1,10 @@
-.onLoad <- function(libname, pkgname) {
-  # put this into zzz.R when package is further along
-  initialize_environments()
-}
 
 #' Check if Environment Exists
 #'
 #' Checks if an environment exists in the list of environments.
 #'
 #' @param env_name The name of the environment to check.
+#' @param verbose If TRUE print message if environment does not exist.
 #' @return TRUE or FALSE.
 environment_exists <- function(env_name, verbose = FALSE) {
   environments <- get_environments()
@@ -45,6 +42,7 @@ environment_exists <- function(env_name, verbose = FALSE) {
 #'
 #' @examples
 #' initialize_environments()
+#' # library("penvir")
 #' check_environment_status()
 #'
 #' @export
@@ -73,9 +71,7 @@ check_environment_status <- function() {
 #' within it. The new environment is independent of the original, meaning
 #' changes to one will not affect the other.
 #'
-#' @param env_name A character string naming the environment to be copied. The
-#'   environment must exist in the `environments` list created during package
-#'   initialization.
+#' @param env Any environment.
 #'
 #' @return A new environment that is a deep copy of the specified environment,
 #'   containing copies of all objects from the original environment.
@@ -90,9 +86,9 @@ check_environment_status <- function() {
 #' environment without altering the original environment's contents.
 #'
 #' @examples
-#' initialize_environments()
-#' get_data("frs")
-#' frs_copy <- deep_copy_env("frs")
+#' # initialize_environments()
+#' frs <- get_data("frs")
+#' frs_copy <- deep_copy_env(frs)
 #' frs_copy$new_data <- 42
 #'
 #' @export
@@ -111,8 +107,6 @@ deep_copy_env <- function(env) {
 #' @param env_name A character string naming the environment to retrieve and
 #'   populate. The environment must exist in the `environments` list created
 #'   during package initialization.
-#' @param expose A logical value indicating whether the populated environment
-#'   should be assigned to the global environment. Default is `FALSE`.
 #'
 #' @details
 #' The function first checks if the specified environment exists in the
@@ -138,15 +132,6 @@ deep_copy_env <- function(env) {
 #' @export
 get_data <- function(env_name) {
   stopifnot(environment_exists(env_name))
-
-  if (!environment_exists) {
-    message(paste0(
-      "Environment '", env_name, "' does not exist. ",
-      "Valid environments are: \n  ",
-      paste(names(environments), collapse = ", "), "."
-    ))
-    return(invisible(NULL))
-  }
 
   populate("env_name")
 
@@ -197,43 +182,9 @@ get_env <- function(env_name) {
 #' environment.
 #'
 #' @return The list of environments.
-#' @export
+#' @noRd
 get_environments <- function() {
   get("environments", envir = .penvir_env)
-}
-
-#' Initialize Environments for the Pension Package
-#'
-#' Sets up a list of empty environments used by the pension package, including the
-#' creation of named environments such as `frs` and `trs`. This function is
-#' called during package loading to ensure that the necessary environments are
-#' available. It can also be called manually if needed to reinitialize the
-#' environments.
-#'
-#' @details
-#' The `initialize_environments` function creates a list of environments that
-#' are used throughout the pension package. Each environment is initialized as
-#' an empty environment with no parent, ensuring isolation. The list of
-#' environments is stored in a package-specific environment, making it
-#' accessible throughout the package but not cluttering the global environment.
-#'
-#' @examples
-#' # Manually initialize environments with defaults (typically not needed)
-#' initialize_environments()
-#'
-#' @export
-initialize_environments <- function() {
-  # Create a package-specific environment to hold all environments
-  .penvir_env <<- new.env(parent = emptyenv())
-
-  # Define standard set of environments
-  env_list <- list(
-    frs = new.env(),
-    trs = new.env()
-  )
-
-  # Store the environments list in the package environment
-  assign("environments", env_list, envir = .penvir_env)
 }
 
 
@@ -388,4 +339,5 @@ reset_env <- function(env_name) {
   rm(list = ls(envir = env), envir = env)
 
   message(paste0("Environment '", env_name, "' has been reset to empty."))
+  return(invisible(NULL))
 }
