@@ -5,7 +5,8 @@
 
 #' Check if Environment Exists
 #'
-#' Checks if an environment exists in the list of environments and provides a helpful error message if it does not.
+#' Checks if an environment exists in the list of environments and provides a
+#' helpful error message if it does not.
 #'
 #' @param env_name The name of the environment to check.
 #' @return The environment if it exists; otherwise, an error is thrown.
@@ -25,9 +26,9 @@ check_environment_exists <- function(env_name) {
 
 #' Check the Status of All Environments
 #'
-#' Returns a tibble listing all environments defined in the package and their status
-#' (either "Populated" or "Unpopulated"). The environments are sorted alphabetically
-#' by name in the resulting tibble.
+#' Returns a tibble listing all environments defined in the package and their
+#' status (either "Populated" or "Unpopulated"). The environments are sorted
+#' alphabetically by name in the resulting tibble.
 #'
 #' @return A tibble with two columns:
 #' \describe{
@@ -36,19 +37,20 @@ check_environment_exists <- function(env_name) {
 #' }
 #'
 #' @details
-#' This function iterates over all environments in the `environments` list, checks whether
-#' each environment is populated (contains any objects), and returns a tibble that shows
-#' the status of each environment. The tibble provides a clear overview of the current state
-#' of all environments, making it easier to manage and track them.
+#' This function iterates over all environments in the `environments` list,
+#' checks whether each environment is populated (contains any objects), and
+#' returns a tibble that shows the status of each environment. The tibble
+#' provides a clear overview of the current state of all environments, making it
+#' easier to manage and track them.
 #'
 #' @examples
 #' initialize_environments()
-#' check_env_status()
+#' check_environment_status()
 #'
 #' @export
-check_env_status <- function() {
+check_environment_status <- function() {
   environments <- get_environments()
-  env_status <- tibble::tibble(
+  environment_status <- tibble::tibble(
     env_name = names(environments) |> sort(),
     status = sapply(names(environments), function(env_name) {
       env <- environments[[env_name]]
@@ -60,28 +62,30 @@ check_env_status <- function() {
     })
   )
 
-  return(env_status)
+  return(environment_status)
 }
 
 #' Create a Deep Copy of an Environment
 #'
-#' Creates a deep copy of the specified environment, including all objects within it.
-#' The new environment is independent of the original, meaning changes to one will
-#' not affect the other.
+#' Creates a deep copy of the specified environment, including all objects
+#' within it. The new environment is independent of the original, meaning
+#' changes to one will not affect the other.
 #'
-#' @param env_name A character string naming the environment to be copied.
-#'   The environment must exist in the `environments` list created during package initialization.
+#' @param env_name A character string naming the environment to be copied. The
+#'   environment must exist in the `environments` list created during package
+#'   initialization.
 #'
-#' @return A new environment that is a deep copy of the specified environment, containing
-#'   copies of all objects from the original environment.
+#' @return A new environment that is a deep copy of the specified environment,
+#'   containing copies of all objects from the original environment.
 #'
 #' @details
-#' The function retrieves the specified environment by name, converts it into a list,
-#' and then creates a new environment using this list. The result is a completely independent
-#' environment that can be modified without affecting the original.
+#' The function retrieves the specified environment by name, converts it into a
+#' list, and then creates a new environment using this list. The result is a
+#' completely independent environment that can be modified without affecting the
+#' original.
 #'
-#' This function is useful when you need to work with a separate copy of an environment
-#' without altering the original environment's contents.
+#' This function is useful when you need to work with a separate copy of an
+#' environment without altering the original environment's contents.
 #'
 #' @examples
 #' initialize_environments()
@@ -97,17 +101,19 @@ deep_copy_env <- function(env_name) {
   return(new_env)
 }
 
-#' Expose an Environment
+#' Get a Pension Fund Environment
 #'
-#' Returns a specified environment, allowing the user to access and modify it.
-#' This function does not modify the global environment. Users can choose to
-#' assign the returned environment to the global environment if needed.
+#' Returns a specified pension fund environment, allowing the user to access and
+#' modify it. This function does not modify the global environment. Users can
+#' choose to assign the returned environment to the global environment if
+#' needed.
 #'
 #' @param env_name The name of the environment to return. The environment must
 #'   exist in the list of environments initialized by the package.
 #'
-#' @return The specified environment. The environment is not assigned to the global
-#'   environment automatically; it is returned and can be assigned by the user if desired.
+#' @return The specified environment. The environment is not assigned to the
+#'   global environment automatically; it is returned and can be assigned by the
+#'   user if desired.
 #'
 #' @examples
 #' initialize_environments()
@@ -128,19 +134,22 @@ get_env <- function(env_name) {
 
 #' Get and Populate a Named Environment
 #'
-#' Retrieves an environment by name, populates it with data and functions if it is empty.
-#' The environment is assumed to be pre-defined in the package and initially empty.
+#' Retrieves an environment by name, populates it with data and functions if it
+#' is empty. The environment is assumed to be pre-defined in the package and
+#' initially empty.
 #'
-#' @param env_name A character string naming the environment to retrieve and populate.
-#'   The environment must exist in the `environments` list created during package initialization.
-#' @param expose A logical value indicating whether the populated environment should
-#'   be assigned to the global environment. Default is `FALSE`.
+#' @param env_name A character string naming the environment to retrieve and
+#'   populate. The environment must exist in the `environments` list created
+#'   during package initialization.
+#' @param expose A logical value indicating whether the populated environment
+#'   should be assigned to the global environment. Default is `FALSE`.
 #'
 #' @details
-#' The function first checks if the specified environment exists in the `environments` list.
-#' If it does not exist, an error is thrown. If the environment is empty, the function attempts
-#' to populate it using data from the package's `extdata` directory. If `expose = TRUE`, the environment
-#' will be returned but not assigned to the global environment.
+#' The function first checks if the specified environment exists in the
+#' `environments` list. If it does not exist, an error is thrown. If the
+#' environment is empty, the function attempts to populate it using data from
+#' the package's `extdata` directory. If `expose = TRUE`, the environment will
+#' be returned but not assigned to the global environment.
 #'
 #' @return Invisibly returns the environment after populating it.
 #'
@@ -202,7 +211,8 @@ get_env <- function(env_name) {
 
 #' Get the List of Environments
 #'
-#' Retrieves the list of environments stored in the package-specific environment.
+#' Retrieves the list of environments stored in the package-specific
+#' environment.
 #'
 #' @return The list of environments.
 #' @export
@@ -212,20 +222,22 @@ get_environments <- function() {
 
 #' Initialize Environments for the Pension Package
 #'
-#' Sets up a list of environments used by the pension package, including the creation
-#' of named environments such as `frs` and `trs`. This function is called during package
-#' loading to ensure that the necessary environments are available. It can also be called
-#' manually if needed to reinitialize the environments.
+#' Sets up a list of environments used by the pension package, including the
+#' creation of named environments such as `frs` and `trs`. This function is
+#' called during package loading to ensure that the necessary environments are
+#' available. It can also be called manually if needed to reinitialize the
+#' environments.
 #'
 #' @param default_envs A named list of environments to initialize by default.
-#'   This allows the user to specify custom default environments. If not provided,
-#'   a standard set of environments will be initialized.
+#'   This allows the user to specify custom default environments. If not
+#'   provided, a standard set of environments will be initialized.
 #'
 #' @details
-#' The `initialize_environments` function creates a list of environments that are used throughout
-#' the pension package. Each environment is initialized as an empty environment with no parent,
-#' ensuring isolation. The list of environments is stored in a package-specific environment,
-#' making it accessible throughout the package but not cluttering the global environment.
+#' The `initialize_environments` function creates a list of environments that
+#' are used throughout the pension package. Each environment is initialized as
+#' an empty environment with no parent, ensuring isolation. The list of
+#' environments is stored in a package-specific environment, making it
+#' accessible throughout the package but not cluttering the global environment.
 #'
 #' @examples
 #' # Manually initialize environments with defaults (typically not needed)
@@ -235,7 +247,8 @@ get_environments <- function() {
 #' initialize_environments(default_envs = list(my_env = new.env()))
 #'
 #' # Reinitialize environments while resetting existing ones
-#' initialize_environments(default_envs = list(frs = new.env(), trs = new.env()))
+#' initialize_environments(default_envs = list(frs = new.env(), trs =
+#' new.env()))
 #'
 #' @export
 initialize_environments <- function(default_envs = list(frs = new.env(), trs = new.env())) {
@@ -252,13 +265,15 @@ initialize_environments <- function(default_envs = list(frs = new.env(), trs = n
 
 #' Run a Pension Model on a Specified Environment
 #'
-#' Executes a pension model using the functions and data contained within a specified
-#' environment. The function currently calculates the benefits associated with the
-#' pension fund and is designed to be extended with additional calculations, such as funding.
+#' Executes a pension model using the functions and data contained within a
+#' specified environment. The function currently calculates the benefits
+#' associated with the pension fund and is designed to be extended with
+#' additional calculations, such as funding.
 #'
-#' @param fund_env An environment containing the necessary data and functions for the pension model.
-#'   The environment is expected to include a `calculate_benefits` function, and may also contain
-#'   other functions and data relevant to pension modeling.
+#' @param fund_env An environment containing the necessary data and functions
+#'   for the pension model. The environment is expected to include a
+#'   `calculate_benefits` function, and may also contain other functions and
+#'   data relevant to pension modeling.
 #'
 #' @return A list with the results of the pension model. Currently, the list contains:
 #' \describe{
@@ -266,13 +281,14 @@ initialize_environments <- function(default_envs = list(frs = new.env(), trs = n
 #' }
 #'
 #' @details
-#' The `pension_model` function is designed to operate on a specific environment representing
-#' a pension fund. The environment should include a `calculate_benefits` function that returns
-#' the total benefits for the fund. The function is structured to allow for easy extension
-#' with additional calculations, such as funding, which can be uncommented or added as needed.
+#' The `pension_model` function is designed to operate on a specific environment
+#' representing a pension fund. The environment should include a
+#' `calculate_benefits` function that returns the total benefits for the fund.
+#' The function is structured to allow for easy extension with additional
+#' calculations, such as funding, which can be uncommented or added as needed.
 #'
-#' This function provides a flexible framework for pension modeling, allowing users to
-#' input different environments representing various pension funds.
+#' This function provides a flexible framework for pension modeling, allowing
+#' users to input different environments representing various pension funds.
 #'
 #' @examples
 #' initialize_environments()
@@ -292,23 +308,24 @@ pension_model <- function(fund_env) {
 
 #' Reset a Named Environment to Its Empty State
 #'
-#' Resets a specified environment by removing all objects within it, effectively returning
-#' it to its initial empty state. The environment must exist in the `environments` list created
-#' during package initialization.
+#' Resets a specified environment by removing all objects within it, effectively
+#' returning it to its initial empty state. The environment must exist in the
+#' `environments` list created during package initialization.
 #'
-#' @param env_name A character string naming the environment to reset. The environment must
-#'   exist in the `environments` list.
+#' @param env_name A character string naming the environment to reset. The
+#'   environment must exist in the `environments` list.
 #'
 #' @details
-#' The function checks if the specified environment exists in the `environments` list.
-#' If the environment is found, all objects within it are removed, leaving the environment empty.
-#' This function can be useful if you want to clear an environment before repopulating it
-#' with new data or functions.
+#' The function checks if the specified environment exists in the `environments`
+#' list. If the environment is found, all objects within it are removed, leaving
+#' the environment empty. This function can be useful if you want to clear an
+#' environment before repopulating it with new data or functions.
 #'
-#' After resetting the environment, a message is printed to confirm that the environment
-#' has been cleared.
+#' After resetting the environment, a message is printed to confirm that the
+#' environment has been cleared.
 #'
-#' @return Invisibly returns `NULL`. The function's primary purpose is to reset the environment.
+#' @return Invisibly returns `NULL`. The function's primary purpose is to reset
+#'   the environment.
 #'
 #' @examples
 #' initialize_environments()
