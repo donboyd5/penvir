@@ -9,19 +9,21 @@
 #' helpful error message if it does not.
 #'
 #' @param env_name The name of the environment to check.
-#' @return The environment if it exists; otherwise, an error is thrown.
-check_environment_exists <- function(env_name) {
+#' @return TRUE or FALSE.
+environment_exists <- function(env_name) {
   environments <- get_environments()
 
-  if (!env_name %in% names(environments)) {
-    stop(paste0(
+  environment_exists <- env_name %in% names(environments)
+
+  if (!environment_exists) {
+    message(paste0(
       "Environment '", env_name, "' does not exist. ",
-      "Please choose from the following valid environments: ",
+      "Valid environments are: \n  ",
       paste(names(environments), collapse = ", "), "."
     ))
   }
 
-  return(environments[[env_name]])
+  return(environment_exists)
 }
 
 #' Check the Status of All Environments
@@ -50,9 +52,10 @@ check_environment_exists <- function(env_name) {
 #' @export
 check_environment_status <- function() {
   environments <- get_environments()
+  sorted_names <- names(environments) |> sort()
   environment_status <- tibble::tibble(
-    env_name = names(environments) |> sort(),
-    status = sapply(names(environments), function(env_name) {
+    env_name = sorted_names,
+    status = sapply(sorted_names, function(env_name) {
       env <- environments[[env_name]]
       if (length(ls(envir = env)) == 0) {
         return("Unpopulated")
@@ -94,42 +97,10 @@ check_environment_status <- function() {
 #' frs_copy$new_data <- 42
 #'
 #' @export
-deep_copy_env <- function(env_name) {
-  env <- check_environment_exists(env_name)
+deep_copy_env <- function(env) {
   env_list <- as.list(env, all.names = TRUE)
   new_env <- list2env(env_list, parent = emptyenv())
   return(new_env)
-}
-
-#' Get a Pension Fund Environment
-#'
-#' Returns a specified pension fund environment, allowing the user to access and
-#' modify it. This function does not modify the global environment. Users can
-#' choose to assign the returned environment to the global environment if
-#' needed.
-#'
-#' @param env_name The name of the environment to return. The environment must
-#'   exist in the list of environments initialized by the package.
-#'
-#' @return The specified environment. The environment is not assigned to the
-#'   global environment automatically; it is returned and can be assigned by the
-#'   user if desired.
-#'
-#' @examples
-#' initialize_environments()
-#'
-#' # Retrieve and expose the 'frs' environment
-#' frs_env <- get_env("frs")
-#'
-#' # Optionally assign it to the global environment
-#' frs <- frs_env
-#'
-#' # Access and modify the environment
-#' print(ls(envir = frs))
-#'
-#' @export
-get_env <- function(env_name) {
-  check_environment_exists(env_name)
 }
 
 #' Get and Populate a Named Environment
@@ -166,14 +137,20 @@ get_env <- function(env_name) {
 #' get_data("frs", expose = TRUE)
 #'
 #' @export
-get_data <- function(env_name, expose = FALSE) {
-  env <- check_environment_exists(env_name)
+get_data <- function(env_name) {
+  stopifnot(environment_exists(env_name))
+
+  populate("env_name")
+
+  env <- get_env(env_name)
 
   if (length(ls(envir = env)) == 0) {
-    print(paste0("Environment ", env_name, " is empty. Populating now..."))
+    message(paste0("Environment ", env_name, " is empty. Populating now..."))
 
-    # Example data file path
-    fpath <- fs::path_package("extdata", env_name, "beneficiaries.rds", package = "penvir")
+    # Path to folder for data files associated with env_name
+    folder_path <- fs::path_package("extdata", env_name, package = "penvir")
+
+    fpath <- fs::path(folder_path, "beneficiaries.rds")
 
     if (file.exists(fpath)) {
       env$beneficiaries <- readRDS(fpath)
@@ -185,28 +162,24 @@ get_data <- function(env_name, expose = FALSE) {
       sum(env$beneficiaries$benefits)
     }
   } else {
-    print(paste0("Environment ", env_name, " is already populated."))
-    cat(paste0('Use reset_env("', env_name, '") to clear the environment before populating.\n'))
-    return(invisible(env))
+    message(paste0("Environment ", env_name, " is already populated."))
+    message(paste0('Use reset_env("', env_name, '") to clear the environment before populating.\n'))
   }
 
-  if (expose) {
-    return(invisible(env))
-  }
-
-  return(env)
+  return(deep_copy_env(env))
 }
 
 
-#' Get a Specific Environment by Name
+#' Get a Specific Pension Fund Environment by Name
 #'
 #' Retrieves a specific environment from the list of environments.
 #'
 #' @param env_name The name of the environment to retrieve.
 #' @return The specified environment.
-#' @export
+#' @noRd
 get_env <- function(env_name) {
-  check_environment_exists(env_name)
+  if(environment_exists(env_name))
+    return(.penvir_env$environments[[env_name]])
 }
 
 #' Get the List of Environments
@@ -222,15 +195,11 @@ get_environments <- function() {
 
 #' Initialize Environments for the Pension Package
 #'
-#' Sets up a list of environments used by the pension package, including the
+#' Sets up a list of empty environments used by the pension package, including the
 #' creation of named environments such as `frs` and `trs`. This function is
 #' called during package loading to ensure that the necessary environments are
 #' available. It can also be called manually if needed to reinitialize the
 #' environments.
-#'
-#' @param default_envs A named list of environments to initialize by default.
-#'   This allows the user to specify custom default environments. If not
-#'   provided, a standard set of environments will be initialized.
 #'
 #' @details
 #' The `initialize_environments` function creates a list of environments that
@@ -243,23 +212,19 @@ get_environments <- function() {
 #' # Manually initialize environments with defaults (typically not needed)
 #' initialize_environments()
 #'
-#' # Initialize with custom environments
-#' initialize_environments(default_envs = list(my_env = new.env()))
-#'
-#' # Reinitialize environments while resetting existing ones
-#' initialize_environments(default_envs = list(frs = new.env(), trs =
-#' new.env()))
-#'
 #' @export
-initialize_environments <- function(default_envs = list(frs = new.env(), trs = new.env())) {
+initialize_environments <- function() {
   # Create a package-specific environment to hold all environments
   .penvir_env <<- new.env(parent = emptyenv())
 
-  # Use default environments if provided, otherwise use the standard set
-  environments <- default_envs
+  # Define standard set of environments
+  env_list <- list(
+    frs = new.env(),
+    trs = new.env()
+    )
 
   # Store the environments list in the package environment
-  assign("environments", environments, envir = .penvir_env)
+  assign("environments", env_list, envir = .penvir_env)
 }
 
 
@@ -299,12 +264,82 @@ initialize_environments <- function(default_envs = list(frs = new.env(), trs = n
 #' @export
 pension_model <- function(fund_env) {
   benefits <- fund_env$calculate_benefits()
-  # funding <- fund_env$calculate_funding()
 
   list(
     benefits = benefits
   )
 }
+
+is_populated <- function(env) {
+  return(length(ls(envir = env)) > 0)
+}
+
+
+#' Populate a Pension Fund Environment With Data
+#'
+#' Populates a pension fund environment with data and functions if it
+#' is empty. The environment is assumed to be pre-defined in the package and
+#' initially empty.
+#'
+#' @param env_name A character string naming the environment to retrieve and
+#'   populate. The environment must exist in the `environments` list created
+#'   during package initialization.
+#'
+#' @details
+#' The function first checks if the specified environment exists in the
+#' `environments` list. If it does not exist, an error is thrown. If the
+#' environment is empty, the function attempts to populate it using data from
+#' the package's `extdata` directory. If `expose = TRUE`, the environment will
+#' be returned but not assigned to the global environment.
+#'
+#' @return Nothing.
+#'
+#' @examples
+#' initialize_environments()
+#'
+#' # Populate the 'frs' environment
+#' frs <- populate("frs")
+#'
+#' # Attempt to populate an already populated environment
+#' frs <- get_data("frs") # This should indicate that 'frs' is already populated
+#'
+#' # Expose the populated environment to the global environment
+#' get_data("frs", expose = TRUE)
+#'
+#' @export
+populate <- function(env_name) {
+
+  # stopifnot(environment_exists(env_name))
+  if(!environment_exists(env_name)) return(invisible(NULL))
+
+  env <- get_env(env_name)
+
+  if(is_populated(env)) {
+    message(paste0("Environment ", env_name, " is already populated."))
+    return(invisible(NULL))
+  }
+
+  message(paste0("Environment ", env_name, " is empty. Populating now..."))
+
+
+  # Path to folder for data files associated with env_name
+  folder_path <- fs::path_package("extdata", env_name, package = "penvir")
+
+  fpath <- fs::path(folder_path, "beneficiaries.rds")
+
+  if (file.exists(fpath)) {
+    env$beneficiaries <- readRDS(fpath)
+  } else {
+    stop(paste0("File not found: ", fpath))
+  }
+
+  env$calculate_benefits <- function() {
+    sum(env$beneficiaries$benefits)
+  }
+
+  return(invisible(NULL))
+}
+
 
 #' Reset a Named Environment to Its Empty State
 #'
@@ -336,7 +371,9 @@ pension_model <- function(fund_env) {
 #'
 #' @export
 reset_env <- function(env_name) {
-  env <- check_environment_exists(env_name)
+  stopifnot(environment_exists(env_name))
+
+  env <- get_env(env_name)
 
   rm(list = ls(envir = env), envir = env)
 
