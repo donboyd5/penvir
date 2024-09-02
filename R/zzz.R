@@ -34,5 +34,7 @@ initialize_environments <- function() {
   )
 
   # Store the environments list in the package environment
-  assign("environments", env_list, envir = get(".penvir_env", envir = parent.env(environment())))
+  assign("environments",
+         env_list,
+         envir = get(".penvir_env", envir = parent.env(environment())))
 }
