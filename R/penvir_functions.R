@@ -3,23 +3,25 @@
 #' Checks if an environment exists in the list of environments.
 #'
 #' @param fund_name The name of the fund to check.
-#' @param verbose If TRUE print message if environment does not exist.
+#' @param stop_on_fail If TRUE print message if environment does not exist, and
+#'   then stop.
 #' @return TRUE or FALSE.
 #' @noRd
-environment_exists <- function(fund_name, verbose = FALSE) {
-  environments <- get_environments()
-  environment_exists <- fund_name %in% names(environments)
+environment_exists <- function(fund_name, stop_on_fail = FALSE) {
+  environments <- get_environments()  # Retrieve available environments
+  exists <- fund_name %in% names(environments)
 
-  if (!environment_exists && verbose) {
-    message(paste0(
+  if (!exists && stop_on_fail) {
+    stop(
       "Pension fund '", fund_name, "' does not exist. ",
-      "Valid environments are: \n  ",
-      paste(names(environments), collapse = ", "), "."
-    ))
+      "Valid funds are: \n  ", paste(names(environments), collapse = ", "), ".",
+      call. = FALSE  # This prevents the function call from being printed in the error message
+    )
   }
 
-  return(environment_exists)
+  return(exists)
 }
+
 
 #' Check the Status of All Pension Fund Environments Stored Internally in penvir
 #'
@@ -138,7 +140,11 @@ clone_fund <- function(fund) {
 get_fund <- function(fund_name) {
   .penvir_env <- get(".penvir_env", envir = parent.env(environment())) # Access .penvir_env
 
-  stopifnot(environment_exists(fund_name))
+  # environment_exists will directly stop execution if the fund doesn't exist
+  # and stop_on_fail is TRUE
+  if (!environment_exists(fund_name, stop_on_fail = TRUE)) {
+    return(invisible(NULL))  # This line is only a fallback; it might never be executed
+  }
 
   populate(fund_name)
   env <- get_env(fund_name)
@@ -249,7 +255,7 @@ is_populated <- function(env) {
 #'
 #' @export
 populate <- function(fund_name) {
-  if (!environment_exists(fund_name, verbose = TRUE)) {
+  if (!environment_exists(fund_name, stop_on_fail = TRUE)) {
     return(invisible(NULL))
   }
 
@@ -264,7 +270,7 @@ populate <- function(fund_name) {
     return(invisible(NULL))
   }
 
-  message(paste0("Populating empty fund with stored data ", fund_name, "..."))
+  message(paste0("Populating empty fund ", fund_name, " with stored data..."))
 
   # Path to folder for data files associated with fund_name
   folder_path <- fs::path_package("extdata", fund_name, package = "penvir")
