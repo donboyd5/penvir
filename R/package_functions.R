@@ -1,4 +1,3 @@
-
 #' Check if Environment Exists
 #'
 #' Checks if an environment exists in the list of environments.
@@ -6,11 +5,12 @@
 #' @param env_name The name of the environment to check.
 #' @param verbose If TRUE print message if environment does not exist.
 #' @return TRUE or FALSE.
+#' @noRd
 environment_exists <- function(env_name, verbose = FALSE) {
   environments <- get_environments()
   environment_exists <- env_name %in% names(environments)
 
-  if (!environment_exists & verbose) {
+  if (!environment_exists && verbose) {
     message(paste0(
       "Environment '", env_name, "' does not exist. ",
       "Valid environments are: \n  ",
@@ -41,8 +41,6 @@ environment_exists <- function(env_name, verbose = FALSE) {
 #' easier to manage and track them.
 #'
 #' @examples
-#' # initialize_environments()
-#' # library("penvir")
 #' check_environment_status()
 #'
 #' @export
@@ -65,37 +63,50 @@ check_environment_status <- function() {
   return(environment_status)
 }
 
-#' Create a Deep Copy of an Environment
+#' Create a Clone of a Plan
 #'
-#' Creates a deep copy of the specified environment, including all objects
-#' within it. The new environment is independent of the original, meaning
-#' changes to one will not affect the other.
+#' Creates a clone, or "deep copy," of a plan in the workspace, including all of
+#' its elements. The clone is a separate copy of the original plan, meaning
+#' changes to one will not affect the other. within it.
 #'
-#' @param env Any environment.
+#' @param plan Any plan in the workspace, as long as it is an environment.
 #'
-#' @return A new environment that is a deep copy of the specified environment,
-#'   containing copies of all objects from the original environment.
+#' @return A new plan that is a deep copy of the specified plan, containing
+#'   copies of all objects from the original plan.
 #'
 #' @details
-#' The function retrieves the specified environment by name, converts it into a
-#' list, and then creates a new environment using this list. The result is a
-#' completely independent environment that can be modified without affecting the
-#' original.
 #'
-#' This function is useful when you need to work with a separate copy of an
-#' environment without altering the original environment's contents.
+#' This function is useful when you need to work with a separate copy of a plan
+#' without altering the original environment's contents. For example it would be
+#' useful if you obtained the frs plan from the package, made some changes, want
+#' to keep the saved version, and then create new plan based on the changed
+#' plan.
 #'
-#' @examples
-#' # initialize_environments()
+#'@examples
 #' frs <- get_data("frs")
-#' frs_copy <- deep_copy_env(frs)
-#' frs_copy$new_data <- 42
+#' names(frs)
 #'
+#' # assignment does not make a true copy of frs, it simply points to the original
+#' frs2 <- frs
+#' # add something to frs2
+#' frs2$x <- 7
+#' names(frs2)
+#' # did it affect frs? oops, yes, but that's probably NOT what we want
+#' names(frs)
+#'
+#' # what we probably really want is a clone of frs, independent from the original
+#' frs <- get_data("frs") # get a fresh version of the data
+#' names(frs) # good, back to the original
+#' # add something to frs2
+#' frs2$x <- 7
+#' names(frs2)
+#' # did it affect frs? no. for many use cases, this is what we'll want
+#' names(frs)
 #' @export
-deep_copy_env <- function(env) {
-  env_list <- as.list(env, all.names = TRUE)
-  new_env <- list2env(env_list, parent = emptyenv())
-  return(new_env)
+clone_plan <- function(plan) {
+  # check for existence and status as environment
+  new_plan <- rlang::env_clone(plan, parent = emptyenv())
+  return(new_plan)
 }
 
 #' Get and Populate a Named Environment
@@ -117,8 +128,6 @@ deep_copy_env <- function(env) {
 #' @return Invisibly returns the environment after populating it.
 #'
 #' @examples
-#' # initialize_environments()
-#'
 #' # Populate and retrieve the 'frs' environment
 #' frs <- get_data("frs")
 #'
@@ -127,16 +136,15 @@ deep_copy_env <- function(env) {
 #'
 #' @export
 get_data <- function(env_name) {
-  .penvir_env <- get(".penvir_env", envir = parent.env(environment()))  # Access .penvir_env
+  .penvir_env <- get(".penvir_env", envir = parent.env(environment())) # Access .penvir_env
 
   stopifnot(environment_exists(env_name))
 
   populate(env_name)
   env <- get_env(env_name)
 
-  return(deep_copy_env(env))
+  return(rlang::env_clone(env, parent = emptyenv()))
 }
-
 
 
 #' Get a Specific Pension Fund Environment by Name
@@ -230,8 +238,6 @@ is_populated <- function(env) {
 #' @return Nothing.
 #'
 #' @examples
-#' # initialize_environments()
-#'
 #' # Populate the 'frs' environment
 #' frs <- populate("frs")
 #'
@@ -240,7 +246,7 @@ is_populated <- function(env) {
 #'
 #' @export
 populate <- function(env_name) {
-  if (!environment_exists(env_name, verbose=TRUE)) {
+  if (!environment_exists(env_name, verbose = TRUE)) {
     return(invisible(NULL))
   }
 
@@ -311,3 +317,22 @@ reset_env <- function(env_name) {
   message(paste0("Environment '", env_name, "' has been reset to empty."))
   return(invisible(NULL))
 }
+
+
+#' Sort Names of Object Elements
+#'
+#' This function takes an object and returns the names of its elements sorted in
+#' alphabetical order. It is useful for quickly getting an ordered list of
+#' names, particularly for named vectors, lists, or data frames.
+#'
+#' @param obj An R object with named elements.
+#' @return A character vector containing the names of the elements in the object
+#'   sorted alphabetically.
+#' @examples
+#' ns(mtcars) # returns sorted names of the dataset columns
+#' ns(list(apple = 1, banana = 2)) # returns c("apple", "banana")
+#' @export
+ns <- function (obj) {
+  names(obj) |> sort()
+}
+

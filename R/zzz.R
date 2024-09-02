@@ -4,8 +4,8 @@
 
 #' Initialize Environments for the Pension Package
 #'
-#' Sets up a list of empty environments used by the pension package, including the
-#' creation of named environments such as `frs` and `trs`. This function is
+#' Sets up a list of empty environments used by the pension package, including
+#' the creation of named environments such as `frs` and `trs`. This function is
 #' called during package loading to ensure that the necessary environments are
 #' available. It can also be called manually if needed to reinitialize the
 #' environments.
@@ -23,7 +23,9 @@
 #' @noRd
 initialize_environments <- function() {
   # Create a package-specific environment to hold all environments
-  assign(".penvir_env", new.env(parent = emptyenv()), envir = parent.env(environment()))
+  assign(".penvir_env", new.env(parent = emptyenv()),
+    envir = parent.env(environment())
+  )
 
   # Define standard set of environments
   env_list <- list(
