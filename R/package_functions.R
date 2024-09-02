@@ -147,9 +147,9 @@ get_data <- function(env_name) {
 }
 
 
-#' Get a Specific Pension Fund Environment by Name
+#' Get a Specific Pension Plan by Name
 #'
-#' Retrieves a specific environment from the list of environments.
+#' Retrieves a specific plan from the list of plans.
 #'
 #' @param env_name The name of the environment to retrieve.
 #' @return The specified environment.
