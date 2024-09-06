@@ -37,3 +37,13 @@ frs2$beneficiaries
 frs2$calculate_benefits()
 depopulate("frs2")  # generates error as is not an internal fund
 
+
+
+# test package ------------------------------------------------------------
+
+devtools::test()
+
+
+
+
+
