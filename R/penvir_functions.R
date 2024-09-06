@@ -3,7 +3,7 @@
 #' Checks if an environment exists in the list of environments.
 #'
 #' @param fund_name The name of the fund to check.
-#' @param stop_on_fail If TRUE print message if environment does not exist, and
+#' @param stop_on_fail If TRUE and environment does not exist, print message
 #'   then stop.
 #' @return TRUE or FALSE.
 #' @noRd
@@ -65,7 +65,7 @@ check_fund_status <- function() {
   return(environment_status)
 }
 
-#' Create a Clone of a Pension Fund
+#' Clone a Pension Fund That is in the Workspace
 #'
 #' Creates a clone, or "deep copy," of a pension fund in the workspace, including all of
 #' its elements. The clone is a separate copy of the original fund, meaning
@@ -111,18 +111,20 @@ clone_fund <- function(fund) {
   return(new_fund)
 }
 
-#' Get and Populate a Named Environment
+#' Get an Internally Stored Pension Fund, Populating It If Emptry
 #'
-#' Retrieves an environment by name, populates it with data and functions if it
-#' is empty. The environment is assumed to be pre-defined in the package and
-#' initially empty.
+#' Retrieves an internally stored pension fund. Populate with data and functions
+#' if it is empty. The environment is assumed to be pre-defined in the package
+#' and initially empty.
+#'
+#' Use `get_fund` to put a copy of an internally stored pension fund into the
+#' workspace.
 #'
 #' @param fund_name A character string naming the pension fund to retrieve and
 #'   populate. The environment must exist in the `environments` list created
 #'   during package initialization.
 #'
-#' @details
-#' The function first checks if the specified environment exists in the
+#' @details The function first checks if the specified environment exists in the
 #' `environments` list. If it does not exist, an error is thrown. If the
 #' environment is empty, the function attempts to populate it using data from
 #' the package's `extdata` directory.
@@ -147,6 +149,7 @@ get_fund <- function(fund_name) {
   }
 
   populate(fund_name)
+  message("Retrieving populated fund: ", fund_name, ".")
   env <- get_env(fund_name)
 
   return(rlang::env_clone(env, parent = emptyenv()))
@@ -270,7 +273,7 @@ populate <- function(fund_name) {
     return(invisible(NULL))
   }
 
-  message(paste0("Populating empty fund ", fund_name, " with stored data..."))
+  message(paste0("Populating internal copy of empty fund ", fund_name, " with stored data..."))
 
   # Path to folder for data files associated with fund_name
   folder_path <- fs::path_package("extdata", fund_name, package = "penvir")
@@ -291,11 +294,13 @@ populate <- function(fund_name) {
 }
 
 
-#' Depopulate a Named Fund
+#' Depopulate an Internally Stored Pension Fund
 #'
 #' Depopulates the internal copy of a specified fund by removing all objects
 #' within it, effectively returning it to its initial empty state. The fund must
 #' exist in the `environments` list created during package initialization.
+#'
+#' Depopulate funds that won't be used, to keep memory of the package clean.
 #'
 #' @param fund_name A character string naming the fund to depopulate. The
 #'   fund must exist in the `environments` list.
