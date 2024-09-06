@@ -4,8 +4,9 @@ Title: Develop Tools for Working with Pension Fund Environments
 Version: 0.1.0
 Author: Who wrote it
 Maintainer: Don Boyd <donboyd5@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Provides access to data for several individual pension funds, 
+    stored internally. It also will provide options for users to load their own
+    data for individual funds, although these data will not be stored internally.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -15,7 +16,7 @@ RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
 Suggests:
-    testthat,
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown
 Imports: 

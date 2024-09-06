@@ -1,27 +1,3 @@
-#' Check if Environment Exists
-#'
-#' Checks if an environment exists in the list of environments.
-#'
-#' @param fund_name The name of the fund to check.
-#' @param stop_on_fail If TRUE print message if environment does not exist, and
-#'   then stop.
-#' @return TRUE or FALSE.
-#' @noRd
-environment_exists <- function(fund_name, stop_on_fail = FALSE) {
-  environments <- get_environments()  # Retrieve available environments
-  exists <- fund_name %in% names(environments)
-
-  if (!exists && stop_on_fail) {
-    stop(
-      "Pension fund '", fund_name, "' does not exist. ",
-      "Valid funds are: \n  ", paste(names(environments), collapse = ", "), ".",
-      call. = FALSE  # This prevents the function call from being printed in the error message
-    )
-  }
-
-  return(exists)
-}
-
 
 #' Check the Status of All Pension Fund Environments Stored Internally in penvir
 #'
@@ -65,7 +41,7 @@ check_fund_status <- function() {
   return(environment_status)
 }
 
-#' Create a Clone of a Pension Fund
+#' Clone a Pension Fund That is in the Workspace
 #'
 #' Creates a clone, or "deep copy," of a pension fund in the workspace, including all of
 #' its elements. The clone is a separate copy of the original fund, meaning
@@ -109,115 +85,6 @@ clone_fund <- function(fund) {
   # check for existence and status as environment
   new_fund <- rlang::env_clone(fund, parent = emptyenv())
   return(new_fund)
-}
-
-#' Get and Populate a Named Environment
-#'
-#' Retrieves an environment by name, populates it with data and functions if it
-#' is empty. The environment is assumed to be pre-defined in the package and
-#' initially empty.
-#'
-#' @param fund_name A character string naming the pension fund to retrieve and
-#'   populate. The environment must exist in the `environments` list created
-#'   during package initialization.
-#'
-#' @details
-#' The function first checks if the specified environment exists in the
-#' `environments` list. If it does not exist, an error is thrown. If the
-#' environment is empty, the function attempts to populate it using data from
-#' the package's `extdata` directory.
-#'
-#' @return Invisibly returns the environment after populating it.
-#'
-#' @examples
-#' # Populate and retrieve the 'frs' environment
-#' frs <- get_fund("frs")
-#'
-#' # Attempt to populate an already populated environment
-#' frs <- get_fund("frs") # This should indicate that 'frs' is already populated
-#'
-#' @export
-get_fund <- function(fund_name) {
-  .penvir_env <- get(".penvir_env", envir = parent.env(environment())) # Access .penvir_env
-
-  # environment_exists will directly stop execution if the fund doesn't exist
-  # and stop_on_fail is TRUE
-  if (!environment_exists(fund_name, stop_on_fail = TRUE)) {
-    return(invisible(NULL))  # This line is only a fallback; it might never be executed
-  }
-
-  populate(fund_name)
-  env <- get_env(fund_name)
-
-  return(rlang::env_clone(env, parent = emptyenv()))
-}
-
-
-#' Get a Specific Pension Fund by Name
-#'
-#' Retrieves a specific fund from the list of plans.
-#'
-#' @param fund_name The name of the fund to retrieve.
-#' @return The specified fund
-#' @noRd
-get_env <- function(fund_name) {
-  if (environment_exists(fund_name)) {
-    return(.penvir_env$environments[[fund_name]])
-  }
-}
-
-#' Get the List of Environments
-#'
-#' Retrieves the list of environments stored in the package-specific
-#' environment.
-#'
-#' @return The list of environments.
-#' @noRd
-get_environments <- function() {
-  get("environments", envir = .penvir_env)
-}
-
-
-#' Run a Pension Model on a Specified Pension Fund Environment
-#'
-#' Executes a pension model using the functions and data contained within a
-#' specified environment. The function currently calculates the benefits
-#' associated with the pension fund and is designed to be extended with
-#' additional calculations, such as funding.
-#'
-#' @param fund_env An environment containing the necessary data and functions
-#'   for the pension model. The environment is expected to include a
-#'   `calculate_benefits` function, and may also contain other functions and
-#'   data relevant to pension modeling.
-#'
-#' @return A list with the results of the pension model. Currently, the list contains:
-#' \describe{
-#'   \item{benefits}{The calculated benefits from the `calculate_benefits` function.}
-#' }
-#'
-#' @details
-#' The `pension_model` function is designed to operate on a specific environment
-#' representing a pension fund. The environment should include a
-#' `calculate_benefits` function that returns the total benefits for the fund.
-#' The function is structured to allow for easy extension with additional
-#' calculations, such as funding, which can be uncommented or added as needed.
-#'
-#' This function provides a flexible framework for pension modeling, allowing
-#' users to input different environments representing various pension plans.
-#'
-#' @examples
-#' # initialize_environments()
-#' frs <- get_fund("frs")
-#' results <- pension_model(frs)
-#' print(results$benefits)
-#'
-#' @export
-pension_model <- function(fund_env) {
-  benefits <- fund_env$calculate_benefits()
-
-  list(
-    benefits = benefits
-  )
 }
 
 is_populated <- function(env) {
@@ -270,7 +137,7 @@ populate <- function(fund_name) {
     return(invisible(NULL))
   }
 
-  message(paste0("Populating empty fund ", fund_name, " with stored data..."))
+  message("\n", "Populating internal copy of empty fund ", fund_name, " with stored data...")
 
   # Path to folder for data files associated with fund_name
   folder_path <- fs::path_package("extdata", fund_name, package = "penvir")
@@ -291,11 +158,13 @@ populate <- function(fund_name) {
 }
 
 
-#' Depopulate a Named Fund
+#' Depopulate an Internally Stored Pension Fund
 #'
 #' Depopulates the internal copy of a specified fund by removing all objects
 #' within it, effectively returning it to its initial empty state. The fund must
 #' exist in the `environments` list created during package initialization.
+#'
+#' Depopulate funds that won't be used, to keep memory of the package clean.
 #'
 #' @param fund_name A character string naming the fund to depopulate. The
 #'   fund must exist in the `environments` list.
@@ -321,7 +190,12 @@ populate <- function(fund_name) {
 #'
 #' @export
 depopulate <- function(fund_name) {
-  stopifnot(environment_exists(fund_name))
+
+  # environment_exists will directly stop execution if the fund doesn't exist
+  # and stop_on_fail is TRUE
+  if (!environment_exists(fund_name, stop_on_fail = TRUE)) {
+    return(invisible(NULL))  # This line is only a fallback; it might never be executed
+  }
 
   env <- get_env(fund_name)
   if(!is_populated(env)) {
@@ -336,20 +210,4 @@ depopulate <- function(fund_name) {
 }
 
 
-#' Sort Names of Object Elements
-#'
-#' This function takes an object and returns the names of its elements sorted in
-#' alphabetical order. It is useful for quickly getting an ordered list of
-#' names, particularly for named vectors, lists, or data frames.
-#'
-#' @param obj An R object with named elements.
-#' @return A character vector containing the names of the elements in the object
-#'   sorted alphabetically.
-#' @examples
-#' ns(mtcars) # returns sorted names of the dataset columns
-#' ns(list(apple = 1, banana = 2)) # returns c("apple", "banana")
-#' @export
-ns <- function (obj) {
-  names(obj) |> sort()
-}
 
