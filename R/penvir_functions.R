@@ -137,7 +137,7 @@ populate <- function(fund_name) {
     return(invisible(NULL))
   }
 
-  message(paste0("Populating internal copy of empty fund ", fund_name, " with stored data..."))
+  message("\n", "Populating internal copy of empty fund ", fund_name, " with stored data...")
 
   # Path to folder for data files associated with fund_name
   folder_path <- fs::path_package("extdata", fund_name, package = "penvir")

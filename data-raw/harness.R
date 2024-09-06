@@ -35,7 +35,7 @@ check_fund_status()
 ns(frs2)
 frs2$beneficiaries
 frs2$calculate_benefits()
-depopulate("frs2")  # generates error as is not an internal fund
+depopulate("frs2")  # generates error as frs2 is not an internal fund
 
 
 
